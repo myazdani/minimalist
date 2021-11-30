@@ -3,6 +3,20 @@ import requests
 from io import BytesIO
 import numpy as np
 from random import random
+import argparse
+import sys
+
+parser = argparse.ArgumentParser(description='Minimal example of dumping args into log file.')
+parser.add_argument('--img_url',type=str, default="https://source.unsplash.com/iXp4yp8A9Tw/1920x1306",
+                    help='Horizontal step length')
+parser.add_argument('--h_len',type=int, default=5,
+                    help='Horizontal step length')
+parser.add_argument('--v_len',type=int, default=5,
+                    help='Vertical step length')
+
+
+args = parser.parse_args()
+
 
 class Canvas:
     def __init__(self, img):
@@ -45,11 +59,15 @@ class Canvas:
 
 
 if __name__ == "__main__":
-    url = "https://source.unsplash.com/iXp4yp8A9Tw/1920x1306"
+    url = args.img_url
+    h_len, v_len = args.h_len, args.v_len
     response = requests.get(url)
-    img = Image.open(BytesIO(response.content))
+    try:
+        img = Image.open(BytesIO(response.content))
+    except:
+        print("Bad URL")
+        sys.exit()
 
     geometric_img = Canvas(np.asarray(img))
-    res_im = geometric_img.generate(h_splits=3, v_splits=2, thresh=.9)
-    print(np.asarray(res_im).shape)
-    res_im.save("outpout." + img.format)
+    res_im = geometric_img.generate(h_splits=h_len, v_splits=v_len, thresh=.9)
+    res_im.save("outpout" + "." + img.format)
